@@ -14,17 +14,19 @@ const ports = {
 const urls = {
   server: {
     local: {
-      url: "http://localhost",
+      url: "http://localhost:3035",
       mongoUrl: `mongodb://localhost:27017/${dbName}`,
       pathToStaticFiles: resolve(__dirname, "..", "..", `${dbName}-uploads`),
       pathToAssets: resolve(__dirname, "..", `assets`),
     },
     dev: {
+      url: "http://localhost:3035",
       mongoUrl: `mongodb://localhost:27017/${dbName}`,
       pathToStaticFiles: resolve(__dirname, "..", "..", `${dbName}-uploads`),
       pathToAssets: resolve(__dirname, "..", `assets`),
     },
     prod: {
+      url: "http://localhost:3035",
       mongoUrl: `mongodb://localhost:27017/${dbName}`,
       pathToStaticFiles: resolve(__dirname, "..", "..", `${dbName}-uploads`),
       pathToAssets: resolve(__dirname, "..", `assets`),
@@ -35,10 +37,10 @@ const urls = {
       url: "http://localhost:3000",
     },
     dev: {
-      url: "",
+      url: "http://localhost:3000",
     },
     prod: {
-      url: "",
+      url: "http://localhost:3000",
     },
   },
 };
@@ -82,29 +84,9 @@ const mongodbParams = {
   useFindAndModify: false,
 };
 
-const auth = {
-  secret: process.env.JWT_SECRET || "SWpjFdOaVcLnHVmn",
-  tokenLife: process.env.SECRET_TOKEN_LIFE || "86400000",
-  reset_password: process.env.JWT_RESET_PASSWORD || "asfknkasv",
-  refreshTokenSecret: process.env.JWT_REFRESH || "qhcXtwLXNketNBpJ",
-};
 
-const facebookCredentials = {
-  clientID: process.env.FB_CLIENT_ID,
-  clientSecret: process.env.FB_CLIENT_SECRET,
-  callbackURL: `${server.baseUrl}/api/v1/auth/facebook/callback`,
-  successURL: `${server.clientUrl}`,
-  failureURL: `${server.clientUrl}/login-failed`,
-};
 
-const googleCredentials = {
-  googleClientIdFirebase: process.env.GOOGLE_CLIENT_ID_FIREBASE,
-  clientID: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: `${server.baseUrl}/api/v1/auth/google/callback`,
-  successURL: `${server.clientUrl}`,
-  failureURL: `${server.clientUrl}/login-failed`,
-};
+
 
 const devicePlatforms = {
   android: "android",
@@ -127,7 +109,6 @@ module.exports = {
   server,
   urls,
   mongodbParams,
-  auth,
   devicePlatforms,
   imgMimetype,
   videoMimetype,

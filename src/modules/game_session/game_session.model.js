@@ -7,7 +7,7 @@ const GameSessionSchema = new Schema(
     current_multiplier:{
       type: Number,
       required: true,
-      default: 1.02
+      default: 1.0
     },
     status: {
       type: String,

@@ -18,7 +18,7 @@ const RefAuthSchema = new Schema(
     createdAt: {
       type: Date,
       default: Date.now,
-      expires: auth.tokenLife,
+      expires: process.env.tokenLife,
       required: true,
     },
   },

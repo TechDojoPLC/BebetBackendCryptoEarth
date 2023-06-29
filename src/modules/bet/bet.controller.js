@@ -18,6 +18,15 @@ const GetAll = async (req,res) => {
      res.status(400).json({ error: err.message });
    });
 }
+const GetAllTopWithCount = async (req,res) => {
+  const {count} = req.params;
+  betService
+   .GetAllTopWithCount({count: count})
+   .then((data) => res.status(200).json(data))
+   .catch((err) => {
+     res.status(400).json({ error: err.message });
+   });
+}
 const GetAllWithCount = async (req,res) => {
   const {count} = req.params;
   betService
@@ -87,4 +96,5 @@ module.exports = {
   GetAllWithCount,
   GetAllByUserIdCount,
   GetAllByCurrentGame,
+  GetAllTopWithCount,
 };

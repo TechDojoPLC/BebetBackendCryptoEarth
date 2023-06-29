@@ -11,4 +11,6 @@ router
     .post("/updateData", userController.updateData)
     .post("/updatePassword", userController.updatePassword)
     .post("/ref_connect", userController.RefConnect)
+    .get("/getUserStatistics", userController.getUserStatistics)
+    
 module.exports = router;

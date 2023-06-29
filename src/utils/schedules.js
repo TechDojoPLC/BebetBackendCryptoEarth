@@ -6,9 +6,9 @@ const { params } = require('./globals');
 
 let CurrentSchedules = []
 function sheduleGameSessionStart() {
-    var task = cron.schedule(`*/${process.env.gameIntervalMinutes} * * * *`, async () =>  {
+    var task = cron.schedule(`*/30 * * * * *`, async () =>  {
         try{
-            if (params.gameTranslationSource) GameSessionMake({is_test: false});
+            GameSessionMake({is_test: false});
         }catch(err){
             console.log(err)
         }

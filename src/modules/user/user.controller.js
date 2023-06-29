@@ -63,6 +63,16 @@ function GetCurrentUser(req, res) {
       res.status(400).json({ error: err.message });
     });
 }
+function getUserStatistics(req, res) {
+
+  return userService
+    .getUserStatistics(req)
+    .then((data) => res.status(200).json(data))
+    .catch((err) => {
+      res.status(400).json({ error: err.message });
+    });
+}
+
 function Authorize(req, res) {
 
   return userService
@@ -78,5 +88,6 @@ module.exports = {
   GetCurrentUser,
   updateData,
   updatePassword,
-  RefConnect
+  RefConnect,
+  getUserStatistics
 };

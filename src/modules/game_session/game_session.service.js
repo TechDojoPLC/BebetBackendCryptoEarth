@@ -45,7 +45,7 @@ const Create = async ({start_multiplie}) => {
 }
 
 const Start = async () =>{
-  console.log("S "+ params.currentGameSession.status + " M " + params.currentGameSession.current_multiplier)
+  //console.log("Starting GameSession")
   if (params.currentGameSession){
     if (params.currentGameSession.status == status.created){
       params.currentGameSession.status = status.started;
@@ -64,7 +64,7 @@ const Start = async () =>{
   return false
 }
 const Stop = async () =>{
-  console.log("Stop " + params.currentGameSession.status)
+  //console.log("Stop GS")
   if (params.currentGameSession){
     if (params.currentGameSession.status == status.started){
       params.currentGameSession.status = status.ended;
@@ -111,10 +111,10 @@ const UpdateMultiplier = async ({max_multiplier, step_per_tick}) => {
       for(let i = 0; i < params.UsersInGame.length; i++){
         sendWebSocketMessage(params.UsersInGame[i], {type: "game_session_updated", multiplier: params.currentGameSession.current_multiplier})
         if (params.UsersInGame[i].current_bets){
-          console.log(params.UsersInGame[i].current_bets)
+          //console.log(params.UsersInGame[i].current_bets)
           if (params.UsersInGame[i].current_bets[0]){
             if (!params.UsersInGame[i].current_bets[0].is_auto_complete){
-              if (params.currentGameSession.current_multiplier >= params.UsersInGame[i].current_bets[0].multiplier){
+              if (params.currentGameSession.current_multiplier >= 1.02){
                 if (params.UsersInGame[i].bet_can_be_taken_done1 === false){
                   sendWebSocketMessage(params.UsersInGame[i], {type: "bet_can_be_taken", order: params.UsersInGame[i].current_bets[0].order})
                   params.UsersInGame[i].bet_can_be_taken_done1 = true;

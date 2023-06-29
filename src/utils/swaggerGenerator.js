@@ -34,7 +34,7 @@ function generateSwagger() {
           bearerAuth: {
             type: "apiKey",
             in: "header",
-            name: "Authorization",
+            name: "authorization",
           },
         },
       },

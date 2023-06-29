@@ -18,5 +18,6 @@ module.exports = {
   Bank: require("../modules/bank/bank.model"),
   RefRefs: require("../modules/ref_refs/ref_refs.model"),
   RefReferenceTrack: require("../modules/ref_reference_track/ref_reference_track.model"),
-  RefOutTransaction: require("../modules/out_ref_transaction/out_ref_transaction.model")
+  InTransaction: require("../modules/in_transaction/in_transaction.model"),
+  OutTransaction: require("../modules/out_transaction/out_transaction.model"),
 };

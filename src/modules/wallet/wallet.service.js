@@ -25,12 +25,26 @@ async function GetAll(data) {
 }
 
 async function getMainWallet(req) {
-  if (req.user){
-    let wallet = await Wallet.findOne({user: req.user._id})
-    if (wallet)
-      return wallet;
+  try{
+    if (req.user){
+      let wallet = await Wallet.findOne({user: req.user._id})
+      if (wallet)
+      {
+        return wallet;
+      }
+      else
+      {
+        let w = await Create(req.user)
+        return w
+      }
+    }
+    throw new Error("No wallet for user")
+  }catch(e)
+  {
+    console.log(e)
+    return null
   }
-  throw new Error("No wallet for user")
+
 }
 
 async function GetAllByUser(data) {

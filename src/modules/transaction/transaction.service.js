@@ -20,6 +20,8 @@ async function Create({user_id, order}) {
   let curTrans = await Transaction.create({user: user_id, status: status.open, game_session: null})
   return curTrans
 }
+
+
 async function Create2({user_id, value, game_session_id}) {
   if (game_session_id){
     let curTrans = await Transaction.create({user: user_id, status: status.open, game_session: game_session_id, value: value})

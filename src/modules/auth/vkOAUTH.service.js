@@ -18,13 +18,13 @@ const { generateJWT } = require("../../utils/auth/generateJWT");
 
 const vkCallback = (req,res) => {
   
-  console.log(req.body)
+  //console.log(req.body)
 }
 
 function C_vkAuthorizer(req,res){
     vkAuthorizer(req)
     .then((data) => {
-      console.log(data)
+      //console.log(data)
       res.status(200).json(data)
     })
     .catch((err) =>{
@@ -40,7 +40,7 @@ const vkAuthorizer = async (req) => {
     }
     let getUserData = await fetch(`https://api.vk.com/method/users.get?user_ids=${user_ids_vk}&fields=bdate,email&access_token=${access_token}&v=5.131`)
     let resJson = await getUserData.json();
-    console.log(resJson.response)
+    //console.log(resJson.response)
     if (resJson){
       if (resJson.response)
         if (resJson.response.length != 0){

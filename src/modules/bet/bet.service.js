@@ -14,7 +14,8 @@ const { params } = require("../../utils/globals");
 const { getRefUserDefended } = require("../ref_user/ref_user.service");
 const { getUserDefended } = require("../user/user.service");
 const refTransactionService = require("../ref_transaction/ref_transaction.service")
-const transactionService = require("../transaction/transaction.service")
+const transactionService = require("../transaction/transaction.service");
+const { log } = require("../../utils/debug");
 
 
 const sendWebSocketMessage = (wsClient, content) => {
@@ -51,8 +52,9 @@ const Create = async ({game_session_id, user_id,value,multiplier, is_auto_comple
     throw new Error(`Bet ${order} is already made`)
   }catch(e){
     console.log(e)
-    return null;
+    return null
   }
+
 }
 const AddBank = async ({value}) => {
   const bank = await Bank.find({})
@@ -85,6 +87,7 @@ const GiveToReferend = async ({user_id, value}) => {
   }
 }
 const CompleteBets = async ({game_session_id}) => {
+  let testBank = 0;
   let foundGameSession = await GameSession.findOne({_id: game_session_id})
   let usersWon = []
   let usersLose = []
@@ -96,6 +99,7 @@ const CompleteBets = async ({game_session_id}) => {
       {
         if (bets[i].multiplier <= foundGameSession.current_multiplier){
           bets[i].is_won = true;
+          testBank -= (bets[i].value * bets[i].multiplier) - bets[i].value
           if (bets[i].transacted === false){
             usersWon.push({user:foundUser._doc, bet: bets[i]._doc})
             if (!foundUser.t){
@@ -104,14 +108,16 @@ const CompleteBets = async ({game_session_id}) => {
                 wallet.value = wallet.value + Number(bets[i].value) * Number(bets[i].multiplier)
                 await wallet.save();
                 bets[i].transacted = true;
-                await bets[i].save();
+                bets[i].result = Number(bets[i].value) * Number(bets[i].multiplier)
                 await transactionService.Create2({user_id: foundUser._id, value: Number(bets[i].value) * Number(bets[i].multiplier), game_session_id: foundGameSession._id})
                 await DiffBank({value: Number(bets[i].value) * Number(bets[i].multiplier)})
               }
             }
           }
+          await bets[i].save();
         }else{
           usersLose.push({user:foundUser._doc, bet: bets[i]._doc})
+          testBank += (bets[i].value * bets[i].multiplier)
           if (!foundUser.t)
           {
             let wallet = await Wallet.findOne({user: foundUser._id})
@@ -127,15 +133,22 @@ const CompleteBets = async ({game_session_id}) => {
           }
         }
       }else{
+        /*
+        bets[i].is_won = true
+        bets[i].multiplier = foundGameSession.current_multiplier
         if (bets[i].is_won){
           usersWon.push({user:foundUser._doc, bet: bets[i]._doc})
+          testBank -= (bets[i].value * bets[i].multiplier) - bets[i].value
         }else{
           usersLose.push({user:foundUser._doc, bet: bets[i]._doc})
+          testBank += (bets[i].value * bets[i].multiplier)
         }
+        */
       }
 
     }
     foundGameSession.status = status.paided;
+    console.log(testBank)
     await foundGameSession.save();
   }
   return {usersWon: usersWon, usersLose: usersLose};
@@ -151,21 +164,24 @@ const CompleteBet = async ({bet_id, game_session_id, is_won}) => {
     throw new Error(localization.ERRORS.GAME_SESSION.GAME_SESSION_NOT_FOUND)
   }
   let user = await User.findOne({_id: bet.user})
-  if (is_won){
-    bet.is_won = true;
-    if (bet.transacted === false){
-      let wallet = await Wallet.findOne({user: user._id})
-      if (wallet){
-        wallet.value = wallet.value + Number(bet.value) * Number(bet.multiplier)
-        await wallet.save();
-        bet.transacted = true;
-        await bet.save()
-        await transactionService.Create2({user_id: user._id, value: Number(bet.value) * Number(bet.multiplier), game_session_id: foundGameSession._id})
-        await DiffBank({value: Number(bet.value) * Number(bet.multiplier)})
-      }
+  //if (is_won){
+  bet.is_won = true;
+  if (bet.transacted === false){
+    let wallet = await Wallet.findOne({user: user._id})
+    if (wallet){
+      let mult = params.currentGameSession.current_multiplier
+      wallet.value = wallet.value + Number(bet.value) * Number(mult)
+      await wallet.save();
+      bet.multiplier = mult;
+      bet.result = Number(bet.value) * Number(mult)
+      bet.transacted = true;
+      await bet.save()
+      await transactionService.Create2({user_id: user._id, value: Number(bet.value) * Number(mult), game_session_id: foundGameSession._id})
+      await DiffBank({value: Number(bet.value) * Number(mult)})
     }
-    await bet.save()
+    //}
   }
+  await bet.save()
   return bet;
 }
 const GetAll = async ({}) => {
@@ -196,6 +212,21 @@ const GetAllWithCount = async ({count}) => {
   }
   return res
 }
+const GetAllTopWithCount = async ({count}) => {
+  const foundBets = await Bet.find({is_won: true}).sort({result: -1}).limit(Number(count))
+  const res = []
+  for (let i = 0; i < foundBets.length; i++){
+    let bres = {}
+    Object.assign(bres, foundBets[i]._doc)
+    let user = await User.findOne({_id: foundBets[i].user})
+    if (user){
+      bres.userObj = {name: user.name, _id: user._id}
+    }
+    res.push(bres)
+  }
+  return res
+}
+
 const GetAllByCurrentGame = async () => {
   if (!params.currentGameSession){
     throw new Error("No game playing curent")
@@ -289,4 +320,5 @@ module.exports = {
   GetAllByUserIdCount,
   GetAllByCurrentGame,
   CreateVirtualBet,
+  GetAllTopWithCount,
 };

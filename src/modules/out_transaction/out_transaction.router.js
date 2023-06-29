@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const refTransactionController = require("../out_transaction/out_transaction.controller")
+const refTransactionController = require("../out_ref_transaction/out_ref_transaction.controller")
 
 router
     .post("/requestOut", refTransactionController.requestOut)

@@ -12,7 +12,7 @@ function Create(req, res) {
 
 const GetAll = async (req,res) => {
   const {count} = req.params;
-  //console.log(count)
+  console.log(count)
   gameSessionService
    .GetAll({count: count})
    .then((data) => res.status(200).json(data))

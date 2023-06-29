@@ -11,23 +11,21 @@ const auth = require("auth-vk").Zeuvs;
 const passport = require("passport");
 const app = express();
 const fileupload = require("express-fileupload");
-const findUserByToken = require("./middlewares/findUserByToken")
-const { default: BSON } = require("bson");
 const fs = require('fs');
-const path = require("path");
+const https = require("https");
+const { createPaymentUrl } = require("./modules/in_transaction/in_transaction.service");
+const { Callback, CallbackCancel } = require("./modules/in_transaction/in_transaction.controller");
+const { Bank, User } = require("./utils/dbs");
 
-const { User, Auth, Bank } = require("./utils/dbs");
-
-const { GetAllMessages, GetAllMessagesByOrder, Add, GetAllMessagesMainChat } = require("./modules/chat/chat.service");
 const { makeSMTPService } = require("./utils/sendSMTP");
-
-const {wsServer, wsServerObject, wsServerTranslation} = require("./utils/websocketCommon.js");
+const http = require('http')
+const {wsServerChat, wsServerGame} = require("./utils/websocketCommon.js");
 const { AttachUserByTokenOrUserData, AttachRefUserByTokenOrUserData } = require("./utils/auth/attachUser");
 const { CatchTraffic } = require("./modules/ref_refs/ref_refs.controller");
 const { sheduleGameSessionStart } = require("./utils/schedules");
-const gameSessionController = require("./modules/game_session/game_session.controller")
+const gameSessionController = require("./modules/game_session/game_session.controller");
+const { log } = require("./utils/debug");
 
-const { methods } = require("./utils/globals");
 
 app.use(express.static(__dirname + "../public"));
 const options = { 
@@ -58,12 +56,14 @@ app.use(
   })
 );
 const showInConsole = (req,res,next)=>{
-  console.log(new Date() + ": " + req.path);
-  console.log("TOKEN " + req.headers.authorization);
-  console.log(req.body);
-  //console.log(req.params)
-  //console.log(req.file)
-  //console.log(req.files)
+  if (req.path === "/api/v1/in_transaction/callback"){
+    log(new Date() + ": " + req.path, "common")
+    //console.log("TOKEN " + req.headers.authorization);
+    log(req.body, "common")
+    //console.log(req.params)
+    //console.log(req.file)
+    //console.log(req.files)
+  }
   next()
 }
 
@@ -93,7 +93,6 @@ passport.use(
       process.nextTick(function () {
         done(null, profile);
       });
-      console.log(accessToken, refreshToken, params, profile, done)
     }
   )
 );
@@ -106,10 +105,14 @@ app.use("/api/v1/ref_auth", require("./modules/ref_auth/ref_auth.router"));
 app.use("/api/v1/ref_refs/CatchTraffic", CatchTraffic);
 app.use("/api/v1/confirmation", require("./modules/confirmation/confirmation.router"));
 app.use("/api/v1/game_session", require("./modules/game_session/game_session.router"));
-app.use("/api/v1/game_session/getAll", gameSessionController.GetAll);
 app.use("/api/v1/game_session/getAll/:count", gameSessionController.GetAll);
+app.use("/api/v1/game_session/getAll", gameSessionController.GetAll);
 
-app.use("/api/v1/bet", AttachUserByTokenOrUserData, require("./modules/bet/bet.router"));
+app.use("/api/v1/bet", require("./modules/bet/bet.router"));
+app.use("/api/v1/in_transaction/callback", Callback)
+app.use("/api/v1/in_transaction/callback_cancel", CallbackCancel)
+
+
 app.use("/api/v1/admin", AttachUserByTokenOrUserData, require("./modules/admin/admin.router"));
 app.use("/api/v1/chat", AttachUserByTokenOrUserData, require("./modules/chat/chat.router"));
 app.use("/api/v1/wallet", AttachUserByTokenOrUserData, require("./modules/wallet/wallet.router"));
@@ -117,7 +120,8 @@ app.use("/api/v1/chat_message", AttachUserByTokenOrUserData, require("./modules/
 app.use("/api/v1/user", AttachUserByTokenOrUserData, require("./modules/user/user.router"));
 app.use("/api/v1/game_session", AttachUserByTokenOrUserData, require("./modules/game_session/game_session.router"));
 app.use("/api/v1/transaction", AttachUserByTokenOrUserData, require("./modules/transaction/transaction.router"));
-
+app.use("/api/v1/in_transaction", AttachUserByTokenOrUserData, require("./modules/in_transaction/in_transaction.router"));
+app.use("/api/v1/out_transaction", AttachRefUserByTokenOrUserData, require("./modules/out_transaction/out_transaction.router"));
 //Ref routes
 app.use("/api/v1/ref_user", AttachRefUserByTokenOrUserData, require("./modules/ref_user/ref_user.router"));
 app.use("/api/v1/ref_wallet", AttachRefUserByTokenOrUserData, require("./modules/ref_wallet/ref_wallet.router"));
@@ -128,20 +132,27 @@ app.use("/api/v1/out_ref_transaction", AttachRefUserByTokenOrUserData, require("
 
 app.use(errorHandler);
 app.use(routeNotFound);
-app.listen(3030, () => {
+app.listen(3030, async () => {
   console.log(`Server is working on port ${3030}`);
   mongoose
     .connect(server.mongodbConnectionUrl, mongodbParams) 
     .then(() => console.log("Connected to MongoDB"))
     .catch((err) => console.log(err));
-  require("./cron");
-  wsServerObject.runWebSocketServer();
-  wsServerTranslation.runWebSocketServer();
+  //require("./cron");
+  wsServerChat.runWebSocketServer();
+  wsServerGame.runWebSocketServer();
+  //wsServerTranslation.runWebSocketServer();
   makeSMTPService();
   getOrCreateMainBank();
   sheduleGameSessionStart();
+  /*
+  let user = await User.find({})
+
+  let t = await createPaymentUrl({user: user[0], body: {amount: 1000, currency: "RUB"}})
+  console.log(t)
+  */
 });
-const https = require("https")
+
 
 https.createServer(options, app).listen(server.port); 
 const getOrCreateMainBank = async () => {
@@ -150,72 +161,13 @@ const getOrCreateMainBank = async () => {
     let bank = await Bank.create({})
   }
 }
-let chatUsers = []
 
-const { WebSocket, WebSocketServer } = require('ws');
+http.createServer((req,res) => {
+  console.log(req.query)
+  console.log(req.body)
+  res.writeHead(200, {"Content-Type": "text/plain"})
+  res.write("OK")
+  res.end()
+}).listen(443)
 
-const serverWSSChat = https.createServer({
-  key: fs.readFileSync("./src/ssl_cert/key.key"), 
-  cert: fs.readFileSync("./src/ssl_cert/cert.csr") 
-});
-
-const wss = new WebSocketServer({ server: serverWSSChat });
-serverWSSChat.listen(9004);
-
-wss.on('connection', onConnectChat)
-async function onConnectChat(wsClient) {
-  try{
-    chatUsers.push(wsClient);
-    console.log('USER_CONNECTED_TO_CHAT_SOCKET');
-    
-    wsClient.on('message', async function(event) {
-      var data = JSON.parse(event)
-      console.log(data)
-      if (data.type === "chat_authorization"){
-        let foundAuthUser = await Auth.findOne({token: data.token})
-        if (!foundAuthUser){
-            wsClient.send(JSON.stringify({type: "ChatAuthFail", error: "Unauthorized"}));
-            return
-        }
-        let foundUser = await User.findOne({_id: foundAuthUser.user})
-        if (!foundUser){
-            wsClient.send(JSON.stringify({type: "ChatAuthFail", error: "User not found"}));
-            return
-        }
-        wsClient.user = foundUser;
-        wsClient.send(JSON.stringify({type: "ChatAuthSuc", value: wsClient.user}))
-    }
-    
-      if (data.type === "chat_add_message"){
-        if (wsClient.user){
-          let res = await Add({_id: wsClient.user._id, text: data.text});
-          console.log("users chat " + chatUsers.length)
-          for(let i = 0; i < chatUsers.length; i++){
-            chatUsers[i].send(JSON.stringify({type: "new_message_added", message: res}));
-          }
-        }
-      }
-      if (data.type === "chat_get_messages"){
-        if (wsClient.user){
-          let mes = await GetAllMessagesMainChat();
-          wsClient.send(JSON.stringify({type: "messages", messages: mes}))
-        }
-      }
-    })
-
-    wsClient.on('close', function() {
-      console.log("USER_DISCONNECTED_FROM_CHAT_SOCKET");
-      chatUsers = chatUsers.filter((item)=>{ 
-          return item != wsClient
-        })
-      })
-  }catch(e){
-    console.log(e)
-  }
-}
-
-
-const sendWebSocketChatRefresh = (wsClient) => {
-  wsClient.send(JSON.stringify({type: "new_message_added", data: true}));
-}
 

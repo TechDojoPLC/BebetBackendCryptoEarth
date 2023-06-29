@@ -4,6 +4,11 @@ const Schema = mongoose.Schema;
 
 const BetSchema = new Schema(
   {
+    result: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
     multiplier:{
       type: Number,
       required: true,

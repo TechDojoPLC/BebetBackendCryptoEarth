@@ -1,7 +1,7 @@
 const { User} = require("../utils/dbs");
 async function findUser(data,replier, wsClient, callback){
     const {email, password} = data
-    console.log(email + " " + password)
+    //console.log(email + " " + password)
     if (email != null && password != null){
         const usr = await User.findOne({email: email, password: password});
         if (!usr){

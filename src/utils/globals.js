@@ -2,7 +2,10 @@ params = {
     currentGameSession: null,
     UsersInGame: [],
     gameTranslationSource: null,
-    Users: []
+    Users: [],
+    ChatUsers : [],
+    PlayersCount : 0,
+    PlayersCountSimulation : 0,
 }
 
 

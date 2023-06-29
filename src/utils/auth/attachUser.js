@@ -16,7 +16,7 @@ const AttachUserByTokenOrUserData = async (req,res,next) => {
                 throw new Error(localization.messages.ERRORS.AUTH.WRONG_EMAIL_OR_PASSWORD);
             }
             let isEqual = await bcrypt.compare(req.body.password, foundUserTest.password)
-            console.log(req.body.password + " : " + foundUserTest.password + " : " + isEqual)
+            //console.log(req.body.password + " : " + foundUserTest.password + " : " + isEqual)
             
             if (isEqual){
                 const userTokenData = {
@@ -66,7 +66,7 @@ const AttachRefUserByTokenOrUserData = async (req,res,next) => {
                 throw new Error(localization.messages.ERRORS.AUTH.WRONG_EMAIL_OR_PASSWORD);
             }
             let isEqual = await bcrypt.compare(req.body.password, foundUserTest.password)
-            console.log(req.body.password + " : " + foundUserTest.password + " : " + isEqual)
+            //console.log(req.body.password + " : " + foundUserTest.password + " : " + isEqual)
             
             if (isEqual){
                 const userTokenData = {

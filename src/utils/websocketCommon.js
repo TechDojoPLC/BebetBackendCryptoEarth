@@ -8,37 +8,37 @@ const betService = require("../modules/bet/bet.service");
 const { Auth, User, Bet, Wallet } = require('./dbs');
 const { status } = require('../modules/game_session/game_session.constants');
 const { createBetsBySimulate, createBetsBySimulateRandomCount } = require('./simulate');
-const { calcGS2 } = require('./gsCals');
+const { calcGS2, calcGS3 } = require('./gsCals');
 const { Add, GetAllMessagesMainChat } = require("../modules/chat/chat.service");
 const {log} = require("../utils/debug")
+const settingsService = require("../modules/settings/settings.service")
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 const GameSessionUpdater = async ({max_multiplier, max_time, step_per_tick}) =>{
     let interval = process.env.gameSessionInterval;
     for(let i = 0; i < (max_time*1000); i+=Number(interval)){
-        let ccc = await UpdateMultiplier({max_multiplier: max_multiplier, step_per_tick: step_per_tick});
+        await UpdateMultiplier({max_multiplier: max_multiplier, step_per_tick: step_per_tick});
         await sleep(Number(interval))
     }
     return true;
 }
 // Common WS
-const GameSessionMake = async ({start_multiplie, step_per_tick, is_test}) =>{
+const GameSessionMake = async () =>{
     try{
-        let c = await Create({start_multiplie:1.0});
-        //await sleep(950)
-        await createBetsBySimulateRandomCount({min:6,max:10, is_test: is_test})
-        //await sleep(4000);
-        await sleep(4000);
-        let data = await calcGS2({interval:Number(process.env.gameSessionInterval)});
+        let settings = await settingsService.Get();
+        if (!settings.is_active) throw new Error("Game is stopped!")
+        await Create({start_multiplie:settings.min_multiplier});
+        await sleep(450)
+        await createBetsBySimulateRandomCount({min:settingsService.min_bot_count,max:settingsService.max_bot_count, is_test: false})
+        await sleep(4550);
+        let data = await calcGS3({interval:Number(process.env.gameSessionInterval)});
         await sleep(1000)
         log(params.currentGameSession, "game_session")
-        let cc = await Start();
+        await Start();
         await sleep(5000);
-        //console.log(cc)
-        let ccc = await GameSessionUpdater({max_time: data.max_time, max_multiplier: data.max_multiplier, step_per_tick: params.currentGameSession.step});
-        let cccc = await Stop();
-        //console.log(cccc)
+        await GameSessionUpdater({max_time: data.max_time, max_multiplier: data.max_multiplier, step_per_tick: params.currentGameSession.step});
+        await Stop();
     }catch(e)
     {
         console.log(e)
@@ -58,21 +58,8 @@ class wsServerGameClass {
             wsClient.current_bets=[]
             console.log(`WSGAME${process.env.WS}: User connected`);
             wsClient.on('message', async function(event) {
-                var data = JSON.parse(event)
-                log(data, "websocket_game")
-            //WSAdminFuncs 
-            /*
-            if (data.type === "admin_request_start"){
-                if (data.secret === process.env.WSADMINSECRET && data.max_multiplier && data.start_multiplie && data.step_per_tick &&data.is_test != null){
-                    GameSessionMake({max_multiplier: Number(data.max_multiplier), start_multiplie: Number(data.start_multiplie), step_per_tick: Number(data.step_per_tick), is_test:data.is_test});
-                    wsClient.send(JSON.stringify({type: "info", message: "admin request completed!"}));
-                }
-                else{
-                    wsClient.send(JSON.stringify({type: "error", message: "Unauthorized! Invalid secret!"}));
-                }
-            }
-            */
-            //test
+            var data = JSON.parse(event)
+            log(data, "websocket_game")
             if (data.type === "admin_request_add_value"){
                 if (data.secret === process.env.WSADMINSECRET && data.value){
                     if (wsClient.user){

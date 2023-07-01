@@ -25,7 +25,6 @@ async function GetAll(){
     resTemp.messages = await GetAllMessages({_id: chats[i]._id})
     res.push(resTemp)
   }
-  //console.log(res)
   return res;
 }
 async function GetAllMessages({_id}){

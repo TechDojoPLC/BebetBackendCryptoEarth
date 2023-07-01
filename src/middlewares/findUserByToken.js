@@ -23,7 +23,6 @@ async function findUserByToken(data,replier, wsClient, callback){
                 const usr = await User.findOne({_id: auth.user})
                 replier(JSON.stringify({type: "reply", message: "" + usr._doc._id}), wsClient);
                 wsClient.userData = usr._doc;
-                //console.log("User connected: " + usr._doc._id)
             }
 
         }

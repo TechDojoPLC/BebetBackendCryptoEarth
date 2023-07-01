@@ -1,6 +1,6 @@
 const router = require("express").Router();
 
-const gameSessionController = require("./game_session.controller")
+const gameSessionController = require("./settings.controller")
 
 
 module.exports = router;

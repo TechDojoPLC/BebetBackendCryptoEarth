@@ -13,7 +13,6 @@ function sendCodeEmail(req, res) {
   }
   function  sendSubmitActionCodeToEmail(req, res) {
     const { email } = req.body;
-    //console.log("sce1")
     return confirmationService
       .sendSubmitActionCodeToEmail(email)
       .then((info) => res.status(200).json(info))

@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 const { Bet, Bank, User } = require("./dbs");
 const { params } = require("./globals");
 const { log } = require("./debug");
-
+const { Get } = require("../modules/settings/settings.service");
+const webcrypto = require('crypto').webcrypto;
 function getRandomArbitrary(min, max) {
     return Math.random() * (max - min) + min;
 }
@@ -166,6 +167,41 @@ const calcGS2 = async ({interval, is_test}) => {
         return {max_time: max_time, max_multiplier: medianMult, step: step};
     }
 }
+const calcGS3 = async ({interval, is_test}) => {
+    let banks = await Bank.find({})
+    let settings = await Get();
+    if (params.currentGameSession && settings){
+        let max_time = 0
+        let medianMult = getCrashPointInclusive(settings)
+        let speed = settings.speed;
+        let step = speed/(Number(interval));
+        if (medianMult > settings.max_multiplier) medianMult = settings.max_multiplier
+        if (medianMult < settings.min_multiplier) medianMult = settings.min_multiplier
+        max_time = medianMult
+        params.currentGameSession.max_multiplier = medianMult;
+        params.currentGameSession.max_time = max_time
+        params.currentGameSession.step = step
+        return {max_time: max_time, max_multiplier: medianMult, step: step};
+    }
+    return null
+}
+function getCrashPointInclusive(settings) {
+    const randomBuffer = new Uint32Array(1);
+    webcrypto.getRandomValues(randomBuffer);
+    let randomNumber = randomBuffer[0] / (0xffffffff + 1);
+    min = Math.ceil(settings.min_multiplier);
+    max = Math.floor(settings.max_multiplier);
+    if (randomNumber % (100/settings.crash_chance) == 0) return settings.min_multiplier
+    return Math.floor(randomNumber * (max - min + 1)) + min;
+}
+function getCrashPoint(settings) {
+    e = 2**32
+    h = webcrypto.getRandomValues(new Uint32Array(10))[0]
+    console.log(h)
+    if (h % (100/settings.crash_chance) == 0) return settings.min_multiplier
+    return Math.floor((100*e-h) / (e-h)) / 100
+}
 module.exports = {
     calcGS2,
+    calcGS3,
 };

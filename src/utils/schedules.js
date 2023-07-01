@@ -8,7 +8,7 @@ let CurrentSchedules = []
 function sheduleGameSessionStart() {
     var task = cron.schedule(`*/30 * * * * *`, async () =>  {
         try{
-            GameSessionMake({is_test: false});
+            GameSessionMake();
         }catch(err){
             console.log(err)
         }

@@ -143,26 +143,6 @@ const UpdateMultiplier = async ({max_multiplier, step_per_tick}) => {
   return false
 
 }
-const GameSessionStartedSignal = ({w,  multiplier}) => {
-  for(let i = 0; w.length; i++){
-    sendWebSocketMessage(w[i], {type: "game_session_started", multiplier: multiplier})
-  }
-  return true
-}
-const GameSessionStoppedSignal = async ({w, multiplier}) => {
-  for(let i = 0; w.length; i++){
-    sendWebSocketMessage(w[i], {type: "game_session_stopped", multiplier: multiplier})
-  }
-  return true
-}
-const GameSessionUpdatedSignal = ({w , multiplier}) => {
-  for(let i = 0; w.length; i++){
-    sendWebSocketMessage(w[i], {type: "game_session_updated", multiplier: multiplier})
-  }
-  return true
-}
-
-
 
 const GetAll = async ({count}) => {
   if (!count){  

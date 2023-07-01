@@ -259,6 +259,7 @@ const GetAllByGameId = async ({_id}) => {
   return foundBets
 }
 const Update = async (req) => {
+  return false
   const _id = req.params.id;
   const foundBet = await Bet.findOne({_id: _id})
   if (!foundBet){
@@ -285,7 +286,6 @@ const CreateVirtualBet = async ({game_session_id, user_id,value,multiplier, is_a
     let bets = await Bet.findOne({user: foundUser._id, game_session: foundGameSession._id, is_auto_complete: is_auto_complete})
     if (!bets){
       let newBet = await Bet.create({value: value, multiplier: multiplier, user: foundUser._id, game_session: foundGameSession._id, is_auto_complete: is_auto_complete, order: order})
-      //console.log({value: value, multiplier: multiplier, user: foundUser._id, game_session: foundGameSession._id, is_auto_complete: is_auto_complete})
       for(let i = 0; i < params.UsersInGame.length; i++){
         sendWebSocketMessage(params.UsersInGame[i], {type: "refresh_bets"})
       }

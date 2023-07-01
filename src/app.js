@@ -149,7 +149,6 @@ app.listen(3030, async () => {
   let user = await User.find({})
 
   let t = await createPaymentUrl({user: user[0], body: {amount: 1000, currency: "RUB"}})
-  console.log(t)
   */
 });
 

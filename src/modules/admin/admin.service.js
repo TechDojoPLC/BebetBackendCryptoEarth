@@ -5,7 +5,6 @@ const { Admin } = require("../../utils/dbs");
 
 const { messages } = require("../../utils/localization");
 
-const { sendMessageToEmail } = require("../../utils/sendGrid");
 
 async function login(body) {
   /*

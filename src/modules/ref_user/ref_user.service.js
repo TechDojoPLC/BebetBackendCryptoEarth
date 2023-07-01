@@ -5,7 +5,6 @@ const { RefUser, User, Wallet, Bet, RefRefs, RefReferenceTrack} = require("../..
 
 const { messages } = require("../../utils/localization");
 
-const { sendMessageToEmail } = require("../../utils/sendGrid");
 const { saveFileToFolder } = require("../../utils/file/fileHelper");
 const localization = require("../../utils/localization");
 const { Create } = require("../ref_wallet/ref_wallet.service");
@@ -281,7 +280,6 @@ async function getDashboardByDate(req){
 
     // Регистрации
     let referendAfterDate = await User.find({refferend: req.user._id, createdAt: {$lt: start_date}})
-    console.log(referendAfterDate)
     let dataReg = []
     for (let i = 0; i < referendAfterDate.length; i++){
       let o = {

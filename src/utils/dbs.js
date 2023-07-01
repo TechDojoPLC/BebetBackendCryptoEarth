@@ -20,4 +20,5 @@ module.exports = {
   RefReferenceTrack: require("../modules/ref_reference_track/ref_reference_track.model"),
   InTransaction: require("../modules/in_transaction/in_transaction.model"),
   OutTransaction: require("../modules/out_transaction/out_transaction.model"),
+  Settings: require("../modules/settings/settings.model"),
 };

@@ -78,7 +78,6 @@ async function sendCodeEmail(email) {
 
 async function checkConfirmation(data){
   const {code} = data
-  //console.log(code)
   const confirm = await getConfirmation({code:code})
   if (!confirm){
     throw new Error(messages.ERRORS.AUTH.CONFIRMATION_DOES_NOT_EXIST);
@@ -93,9 +92,6 @@ async function checkConfirmationAndSetPassword(data){
   if (password == null){
     throw new Error(messages.ERRORS.USER.PASSWORD_MUST_HAS_MORE_THEN_8_CHARACTERS)
   }
-  //if (password.length < 8){
-  //  throw new Error(messages.ERRORS.USER.PASSWORD_MUST_HAS_MORE_THEN_8_CHARACTERS)
-  //}
   const confirm = await getConfirmation({code:code})
   if (!confirm){
     throw new Error(messages.ERRORS.AUTH.CONFIRMATION_DOES_NOT_EXIST);

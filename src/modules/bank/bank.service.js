@@ -12,7 +12,6 @@ const localization = require("../../localizations/en.json");
 async function Create(data) {
   const {_id} = data
   let user = await User.findOne({_id: _id})
-  //console.log(_id, user._id)
   if (!user){
     throw new Error(localization.ERRORS.USER.USER_DOES_NOT_EXIST)
   }

@@ -14,24 +14,6 @@ const {
 } = require("../../config");
 
 const { resolve } = require("path");
-async function unchainAllExistingImages(owner){
-  try{
-    const chained = await User.findOne({_id: owner._id}, {password: 0} )
-    if (chained == null){
-      throw new Error("User not found");
-    }
-    const imgs = await Image.find({chained: owner._id})
-    for (let i = 0; i < imgs.length; i++){
-      imgs[i].chained = null;
-      await imgs[i].save()
-    }
-    return true;
-  }catch(err){
-    console.log(err)
-    return false;
-  }
-
-}
 async function createImageContent(data, user){
     const file = data;
     const folderPath = [folderNameForImageContent];
@@ -68,5 +50,4 @@ async function getImageWithContent(data){
 module.exports = {
   createImageContent,
   getImageWithContent,
-  unchainAllExistingImages,
 };

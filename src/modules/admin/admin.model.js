@@ -4,14 +4,6 @@ const { FileSchema } = require("../../utils/file/file.schema");
 
 const AdminSchema = new Schema(
   {
-    name: {
-      type: String,
-      required: true,
-    },
-    last_name: {
-      type: String,
-      required: false,
-    },
     email: {
       type: String,
       required: false,
@@ -24,18 +16,6 @@ const AdminSchema = new Schema(
       type: String,
       required: false,
     },
-    sex: {
-      type: String,
-      required: false,
-    },
-    tel: {
-      type: String,
-      required: false,
-    },
-    avatar: {
-      type: FileSchema,
-      required: false,
-    }
   }
 );
 

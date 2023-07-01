@@ -6,25 +6,22 @@ const {
 } = require("mongoose");
 
 const { Auth, User} = require("../../utils/dbs");
-const { sendMessageToEmail } = require("../../utils/sendGrid");
 const { messages } = require("../../utils/localization");
 
 const {
   server: { fullBaseUrl, clientUrl },
 } = require("../../config");
 const localization = require("../../localizations/en.json");
-const { Registrate, RegistrateViaVk } = require("../user/user.service");
+const { RegistrateViaVk } = require("../user/user.service");
 const { generateJWT } = require("../../utils/auth/generateJWT");
 
 const vkCallback = (req,res) => {
   
-  //console.log(req.body)
 }
 
 function C_vkAuthorizer(req,res){
     vkAuthorizer(req)
     .then((data) => {
-      //console.log(data)
       res.status(200).json(data)
     })
     .catch((err) =>{
@@ -40,7 +37,6 @@ const vkAuthorizer = async (req) => {
     }
     let getUserData = await fetch(`https://api.vk.com/method/users.get?user_ids=${user_ids_vk}&fields=bdate,email&access_token=${access_token}&v=5.131`)
     let resJson = await getUserData.json();
-    //console.log(resJson.response)
     if (resJson){
       if (resJson.response)
         if (resJson.response.length != 0){

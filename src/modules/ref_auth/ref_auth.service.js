@@ -6,7 +6,6 @@ const {
 } = require("mongoose");
 
 const { Auth, User} = require("../../utils/dbs");
-const { sendMessageToEmail } = require("../../utils/sendGrid");
 const { messages } = require("../../utils/localization");
 
 const {

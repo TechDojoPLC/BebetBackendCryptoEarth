@@ -22,7 +22,6 @@ const GetAll = async (req,res) => {
 }
 const GetAllWithCount = async (req,res) => {
   const {count} = req.params;
-  //console.log(count)
   gameSessionService
    .GetAll({count: count})
    .then((data) => res.status(200).json(data))

@@ -22,10 +22,11 @@ async function createPaymentUrl(req) {
   if (req.user){
     let user = req.user
     const {amount, ip, countryCode} = req.body
+    let curTrans = null
     if (amount && ip && countryCode){
       let token = process.env.payPortToken
       let date = new Date();
-      let curTrans = await InTransaction.create({user: user._id, status: status.open, currency: "RUB", value: amount, open_key: "test", private_key: "test", ip: ip, countryCode: countryCode})
+      curTrans = await InTransaction.create({user: user._id, status: status.open, currency: "RUB", value: amount, open_key: "test", private_key: "test", ip: ip, countryCode: countryCode})
       let count = await InTransaction.countDocuments() +1
       curTrans.order_id = count;
       let data = {
@@ -48,6 +49,7 @@ async function createPaymentUrl(req) {
       curTrans.payment_url = jsonBody.url;
       return {url: curTrans.payment_url}
     }  
+    InTransaction.deleteOne({_id: curTrans._id})
     throw new Error("")
   }
   throw new Error("")
@@ -55,7 +57,7 @@ async function createPaymentUrl(req) {
 
 async function GetAllByUser(req) {
   if (req.user){
-    let curTrans = await Transaction.find({user: req.user._id})
+    let curTrans = await InTransaction.find({user: req.user._id})
     return curTrans
   }
   return []

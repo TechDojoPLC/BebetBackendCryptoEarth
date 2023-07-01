@@ -30,6 +30,7 @@
 		"cookie-parser": "^1.4.5",
 		"cors": "^2.8.5",
 		"cron": "^1.8.2",
+		"crypto": "^1.0.1",
 		"dayjs": "^1.9.7",
 		"dotenv": "^8.2.0",
 		"ejs": "^3.1.9",
@@ -67,6 +68,7 @@
 		"swagger-jsdoc": "^6.0.0-rc.3",
 		"swagger-ui-express": "^4.1.5",
 		"web3": "^1.9.0",
+		"webcrypto": "^0.1.1",
 		"ws": "^8.11.0"
 	},
 	"devDependencies": {

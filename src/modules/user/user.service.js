@@ -5,7 +5,6 @@ const { User, Wallet, RefUser, RefRefs, Bet} = require("../../utils/dbs");
 
 const { messages } = require("../../utils/localization");
 
-const { sendMessageToEmail } = require("../../utils/sendGrid");
 const { saveFileToFolder } = require("../../utils/file/fileHelper");
 const localization = require("../../utils/localization");
 const { Create } = require("../wallet/wallet.service");
